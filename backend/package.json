@@ -1,0 +1,47 @@
+{
+  "name": "amazon-scraper-backend",
+  "version": "1.0.0",
+  "description": "Backend server for Amazon Product Scraper",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node --import ./register.mjs index.js",
+    "dev": "environment=local ./node_modules/nodemon/bin/nodemon.js --import ./register.mjs index.js -q",
+    "lint": "eslint src/**/*.js startup/**/*.js --fix",
+    "migrate": "npx sequelize-cli db:migrate",
+    "migrate:undo": "npx sequelize-cli db:migrate:undo",
+    "migrate:undo:all": "npx sequelize-cli db:migrate:undo:all",
+    "migrate:status": "npx sequelize-cli db:migrate:status"
+  },
+  "dependencies": {
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "express-validator": "^7.0.1",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.2",
+    "openai": "^4.96.2",
+    "pg": "^8.15.6",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.7",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.2",
+    "sequelize-cli": "^6.6.2"
+  },
+  "imports": {
+    "#/*": "./src/*",
+    "#middleware/*": "./src/middleware/*",
+    "#utils/*": "./src/utils/*",
+    "#config/*": "./src/config/*",
+    "#controllers/*": "./src/controllers/*",
+    "#models/*": "./src/models/*",
+    "#routes/*": "./src/routes/*",
+    "#services/*": "./src/services/*"
+  }
+}
