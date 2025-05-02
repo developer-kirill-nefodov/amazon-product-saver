@@ -28,19 +28,18 @@ A backend service for collecting, validating, and storing product data from Amaz
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/amazon-scraper-backend.git
-cd amazon-scraper-backend
+git clone https://github.com/developer-kirill-nefodov/amazon-product-saver.git && cd amazon-product-saver
 ```
 
 ### 2. Install dependencies
 
 ```bash
-npm install
+cd ./backend && npm install
 ```
 
 ### 3. Set up environment variables
 
-Create a `.env` file at the root of the project:
+Create a `.env` file at the root of the backend:
 
 ```
 # Server Configuration
@@ -76,7 +75,15 @@ DB_PORT=5432
 OPENAI_API_KEY=
 ```
 
-### 4. Run database migrations
+### 4. Create the PostgreSQL database
+   Make sure the database amazon_scraper exists before running migrations.
+   You can create it from the terminal:
+
+```bash
+sudo -u postgres createdb amazon_scraper
+```
+
+### 5 Run database migrations
 
 > Note: All migrations are written in CommonJS (`.cjs`) for compatibility with Sequelize CLI.
 
@@ -106,9 +113,7 @@ The frontend is a Chrome extension built with Vue.js 3. Here's how to set it up:
 
 1. Build the extension:
    ```bash
-   cd frontend
-   npm install
-   npm run build
+    cd ./frontend && npm install && npm run build
    ```
 
 2. Load the extension in Chrome:
