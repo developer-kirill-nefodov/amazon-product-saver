@@ -1,31 +1,31 @@
-import { body, validationResult } from 'express-validator';
+import { body, validationResult } from "express-validator";
 
-import openAIService from '#services/openai.service';
+import openAIService from "#services/openai.service";
 
 export const validateProductStructure = [
-  body('data')
+  body("data")
     .exists()
-    .withMessage('Product data is required')
+    .withMessage("Product data is required")
     .isObject()
-    .withMessage('Product data must be an object'),
+    .withMessage("Product data must be an object"),
 
-  body('data.price.current')
+  body("data.price.current")
     .exists()
-    .withMessage('Current price is required')
+    .withMessage("Current price is required")
     .isString()
-    .withMessage('Current price must be a string'),
+    .withMessage("Current price must be a string"),
 
-  body('data.price.currency')
+  body("data.price.currency")
     .exists()
-    .withMessage('Currency is required')
+    .withMessage("Currency is required")
     .isString()
-    .withMessage('Currency must be a string'),
+    .withMessage("Currency must be a string"),
 
-  body('data.identifiers.asin')
+  body("data.identifiers.asin")
     .exists()
-    .withMessage('ASIN is required')
+    .withMessage("ASIN is required")
     .isString()
-    .withMessage('ASIN must be a string'),
+    .withMessage("ASIN must be a string"),
 
   (req, res, next) => {
     const errors = validationResult(req);
@@ -33,7 +33,7 @@ export const validateProductStructure = [
       return res.status(400).json({ errors: errors.array() });
     }
     next();
-  }
+  },
 ];
 
 export const validateProductWithAI = async (req, res, next) => {
@@ -44,10 +44,10 @@ export const validateProductWithAI = async (req, res, next) => {
     req.product = await openAIService.validateProduct(productData, imageBase64);
     next();
   } catch (error) {
-    console.error('AI Validation Error:', error);
+    console.error("AI Validation Error:", error);
     res.status(500).json({
-      message: 'Failed to validate product',
-      error: error.message
+      message: "Failed to validate product",
+      error: error.message,
     });
   }
-}; 
+};

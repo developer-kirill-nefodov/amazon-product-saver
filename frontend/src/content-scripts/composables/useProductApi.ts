@@ -7,13 +7,12 @@ export function useProductApi() {
   const error = ref<string | null>(null);
   const isLoading = ref(false);
 
-  async function saveProduct(productData: ProductData, screenshot: string) {
+  async function saveProduct(productData: ProductData) {
     try {
       isLoading.value = true;
       error.value = null;
 
       const formData = new FormData();
-      formData.append('image', screenshot);
       formData.append('data', JSON.stringify(productData));
 
       const response = await fetch(`${API_BASE_URL}/products`, {

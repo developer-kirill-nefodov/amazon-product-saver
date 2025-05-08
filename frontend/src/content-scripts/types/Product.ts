@@ -1,13 +1,11 @@
 export interface ProductTitle {
-  full: string;
-  brand: string;
-  model: string;
+  title: string;
 }
 
 export interface ProductPrice {
-  current: string;
+  current: string | null;
+  currency: string | null;
   original?: string;
-  currency: string;
   deals?: string[];
 }
 
@@ -45,7 +43,7 @@ export interface ProductSpecifications {
 
 export interface ProductRatings {
   average: number;
-  count: number;
+  // count: number;
   distribution?: Record<string, number>;
 }
 
@@ -70,6 +68,7 @@ export interface ProductData {
   shipping?: ProductShipping;
   identifiers: ProductIdentifiers;
   image?: string;
+  colors?: string[];
 }
 
 export interface Product extends ProductData {
@@ -77,4 +76,4 @@ export interface Product extends ProductData {
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;
-} 
+}

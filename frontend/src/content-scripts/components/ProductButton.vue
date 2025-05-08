@@ -1,14 +1,9 @@
 <template>
-  <button 
-    class="save-product-button" 
-    :class="{ 
-      'loading': isLoading, 
-      'success': isSuccess,
-      'error': !!error 
-    }"
-    :disabled="isLoading"
-    @click="handleClick"
-  >
+  <button class="save-product-button" :class="{
+    'loading': isLoading,
+    'success': isSuccess,
+    'error': !!error
+  }" :disabled="isLoading" @click="handleClick">
     <span v-if="isLoading" class="loader"></span>
     <span>{{ buttonText }}</span>
   </button>
@@ -38,11 +33,11 @@ const buttonText = computed(() => {
 
 async function handleClick() {
   if (isLoading.value) return;
-  
+
   isLoading.value = true;
   isSuccess.value = false;
   error.value = null;
-  
+
   try {
     const productContainer = props.containerRef.closest('.s-result-item');
     if (!productContainer) {
@@ -53,11 +48,11 @@ async function handleClick() {
     if (!extractedData) {
       throw new Error('Failed to extract product data');
     }
-    
+
     const screenshot = await captureElement(productContainer as HTMLElement);
-    
-    const result = await saveProduct(extractedData, screenshot);
-    
+
+    const result = await saveProduct(extractedData);
+
     if (result && result.product) {
       isSuccess.value = true;
       setTimeout(() => {
@@ -92,7 +87,7 @@ async function handleClick() {
   position: relative;
   z-index: 1001;
   white-space: nowrap;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -102,7 +97,7 @@ async function handleClick() {
 .save-product-button:hover:not(:disabled) {
   background-color: #f7ca00;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .save-product-button:disabled {
@@ -142,6 +137,7 @@ async function handleClick() {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -152,4 +148,4 @@ async function handleClick() {
   visibility: visible !important;
   opacity: 1 !important;
 }
-</style> 
+</style>

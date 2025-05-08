@@ -1,6 +1,6 @@
-import { ref } from 'vue';
-import type { ProductData } from '../types/Product';
-import { cleanObject } from '../utils/cleanObject';
+import { ref } from "vue";
+import type { ProductData } from "../types/Product";
+import { cleanObject } from "../utils/cleanObject";
 
 export function useProductData() {
   const productData = ref<ProductData | null>(null);
@@ -9,128 +9,113 @@ export function useProductData() {
     try {
       // Initialize empty product data
       const data: ProductData = {
-        title: { full: '', brand: '', model: '' },
-        price: { current: '', currency: '' },
-        specifications: {
-          display: { size: '', type: '', resolution: '' },
-          memory: { ram: '', storage: '', expandable: '' },
-          battery: { capacity: '', type: '' },
-          camera: { main: '', front: '' },
-          os: { name: '', version: '' },
-          network: { type: '', features: [] },
-          dimensions: '',
-          color: '',
-          features: []
-        },
-        ratings: { average: 0, count: 0 },
-        shipping: { delivery: { date: '', location: '' }, price: '' },
-        identifiers: { asin: '', url: '' }
+        title: { title: "" },
+        price: { current: "", currency: "" },
+        ratings: { average: 0 },
+        identifiers: { asin: "", url: "" },
+        image: "",
       };
 
       // Get ASIN
-      const asin = element.getAttribute('data-asin');
+      const asin = element.getAttribute("data-asin");
       if (!asin) {
-        console.error('No ASIN found');
+        console.error("No ASIN found");
         return null;
       }
       data.identifiers.asin = asin;
 
-      // Get title
-      const titleElement = element.querySelector('h2 a span, h2 span.a-text-normal');
-      if (titleElement) {
-        const fullTitle = titleElement.textContent?.trim() || '';
-        data.title.full = fullTitle;
-
-        // Brand detection
-        if (fullTitle.includes('Apple')) data.title.brand = 'Apple';
-        else if (fullTitle.includes('Samsung')) data.title.brand = 'Samsung';
-        
-        // Model extraction (everything after brand name)
-        if (data.title.brand) {
-          data.title.model = fullTitle.split(data.title.brand)[1]?.trim() || '';
-        }
-
-        // Extract specifications from title
-        const specs = {
-          display: fullTitle.match(/(\d+\.?\d+)(?:\s*-?\s*inch|″)/i),
-          ram: fullTitle.match(/(\d+)\s*GB\s*RAM/i) || fullTitle.match(/(\d+)GB\/\d+GB/i),
-          storage: fullTitle.match(/(\d+)\s*GB(?:\s+storage|\s+ROM|\s*$)/i) || fullTitle.match(/\d+GB\/(\d+)GB/i),
-          battery: fullTitle.match(/(\d+)\s*mAh/i),
-          camera: fullTitle.match(/(\d+)MP/i),
-          screenType: fullTitle.match(/(HD|FHD|QHD|AMOLED|LCD)/i)
-        };
-
-        if (specs.display && data.specifications?.display) {
-          data.specifications.display.size = specs.display[1] + '"';
-        }
-        if (specs.screenType && data.specifications?.display) {
-          data.specifications.display.type = specs.screenType[0];
-        }
-        if (specs.ram && data.specifications?.memory) {
-          data.specifications.memory.ram = specs.ram[1] + 'GB';
-        }
-        if (specs.storage && data.specifications?.memory) {
-          data.specifications.memory.storage = specs.storage[1] + 'GB';
-        }
-        if (specs.battery && data.specifications?.battery) {
-          data.specifications.battery.capacity = specs.battery[1] + 'mAh';
-        }
-        if (specs.camera && data.specifications?.camera) {
-          data.specifications.camera.main = specs.camera[1] + 'MP';
-        }
+      //Get url
+      const titleRecipeEl = element.querySelector('[data-cy="title-recipe"] a');
+      if (titleRecipeEl) {
+        const relativeUrl = titleRecipeEl.getAttribute("href") || "";
+        const fullUrl = new URL(relativeUrl, window.location.href).href;
+        data.identifiers.url = fullUrl;
       }
 
-      // Get price
-      const priceWhole = element.querySelector('.a-price-whole');
-      const priceFraction = element.querySelector('.a-price-fraction');
-      const currencySymbol = element.querySelector('.a-price-symbol');
-      
-      if (priceWhole && priceFraction) {
-        const whole = priceWhole.textContent?.trim() || '0';
-        const fraction = priceFraction.textContent?.trim() || '00';
-        const currency = currencySymbol?.textContent?.trim() || '$';
-        data.price.current = `${currency}${whole}.${fraction}`;
-        data.price.currency = currency;
+      //Title
+      const titleEl = element.querySelector("h2[aria-label]");
+      const fullTitle = titleEl?.getAttribute("aria-label")?.trim() || "";
+      data.title.title = fullTitle;
+
+      //Price
+      const priceContainer = element.querySelector(
+        'a[aria-describedby="price-link"] .a-price'
+      );
+
+      if (priceContainer) {
+        const priceSymbol =
+          priceContainer
+            .querySelector(".a-price-symbol")
+            ?.textContent?.trim() || "$";
+        const priceWhole =
+          priceContainer
+            .querySelector(".a-price-whole")
+            ?.textContent?.replace(/[.,]/g, "")
+            .trim() || "";
+        const priceFraction =
+          priceContainer
+            .querySelector(".a-price-fraction")
+            ?.textContent?.trim() || "0";
+
+        const priceCurrent = `${priceSymbol}${priceWhole}.${priceFraction}`;
+
+        data.price.current = priceCurrent || "0";
+        data.price.currency = priceSymbol || "$";
+      } else {
+        data.price.current = "0";
+        data.price.currency = "$";
       }
 
-      // Get ratings
-      const ratingElement = element.querySelector('.a-icon-star-small');
-      if (ratingElement && data.ratings) {
-        const ratingText = ratingElement.getAttribute('aria-label') || '';
-        const ratingMatch = ratingText.match(/([\d.]+)/);
+      // Rating
+      const ratingEl = element.querySelector(
+        '[data-cy="reviews-ratings-slot"] .a-icon-alt'
+      );
+      if (ratingEl) {
+        const ratingText = ratingEl.textContent?.trim();
+        const ratingMatch = ratingText?.match(/([\d.]+)\s+out of 5/);
         if (ratingMatch) {
+          if (!data.ratings) {
+            data.ratings = { average: 0 };
+          }
           data.ratings.average = parseFloat(ratingMatch[1]);
         }
       }
 
-      // Get review count
-      const reviewCount = element.querySelector('.a-size-base.s-underline-text');
-      if (reviewCount && data.ratings) {
-        const countText = reviewCount.textContent?.trim() || '';
-        const countMatch = countText.match(/(\d+)/);
-        if (countMatch) {
-          data.ratings.count = parseInt(countMatch[1], 10);
-        }
+      //Get Img
+      const imageContainer = element.querySelector(
+        'span[data-component-type="s-product-image"] img'
+      );
+
+      if (imageContainer) {
+        const imageUrl = imageContainer.getAttribute("src") || "";
+        data.image = imageUrl;
+      } else {
+        data.image = "";
       }
 
-      // Get URL
-      const productLink = element.querySelector('h2 a.a-link-normal') as HTMLAnchorElement;
-      if (productLink) {
-        data.identifiers.url = productLink.href;
+      //Get colors
+      const colorSwatches = document.querySelectorAll(
+        `div[data-asin="${asin}"] div[data-csa-c-content-id="color-swatch-link"] a.a-link-normal`
+      );
+
+      const colors: string[] = []; // Temporary array to collect colors
+      colorSwatches.forEach((swatch) => {
+        const ariaLabel = (swatch as HTMLElement).getAttribute("aria-label");
+        if (ariaLabel) {
+          colors.push(ariaLabel);
+        }
+      });
+
+      // Only add colors to data if the array is not empty
+      if (colors.length > 0) {
+        data.colors = colors;
       }
 
-      // Get image URL for screenshot backup
-      const imageElement = element.querySelector('img.s-image');
-      if (imageElement && data.specifications?.features) {
-        const imageUrl = imageElement.getAttribute('src');
-        if (imageUrl) {
-          data.specifications.features.push(`Image: ${imageUrl}`);
-        }
-      }
+      console.log("Extracted product data:", data);
 
       return cleanObject(data) as ProductData;
     } catch (error) {
-      console.error('Error extracting product data:', error);
+      console.error("Error extracting product data:", error);
       return null;
     }
   };
@@ -143,6 +128,6 @@ export function useProductData() {
 
   return {
     productData,
-    updateProductData
+    updateProductData,
   };
-} 
+}
